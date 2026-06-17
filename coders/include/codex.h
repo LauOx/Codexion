@@ -1,0 +1,116 @@
+#ifndef CODEX_H
+#define CODEX_H
+
+//**LIBRARIES */
+#include <stdio.h> // printf
+#include <stdlib.h> // malloc, free
+#include <unistd.h> // usleep
+#include <stdbool.h> // bool, true, false
+#include <pthread.h> //mutex, threads, cond variables
+#include <sys/time.h> // gettimeofday
+#include <limits.h> // INT_MAX
+#include <string.h> // strcmp 
+
+//**OPERATION PCODE FOR MUTEX | THREAD FUNCTIONS */
+typedef enum e_opcode
+{
+    LOCK,
+    UNLOCK,
+    INIT,
+    DESTROY,
+    CREATE,
+    JOIN,
+    DETACH,
+}   t_opcode;
+
+//** STRUCTURES DECLARATION */
+typedef struct  s_dongle t_dongle;
+typedef struct  s_coder t_coder;
+typedef struct  s_desk t_desk;
+typedef struct  s_queue t_queue;
+typedef struct  s_queue_item t_queue_item;
+
+
+//**DONGLE QUEUE */
+struct  s_queue_item {
+    int         coder_id;  // ID del programador (de 1 a number_of_coders)
+    long long   priority;  // FIFO: timestamp de llegada | EDF: deadline de burnout
+};
+
+struct  s_queue {
+    t_queue_item    *array;    // Array de tamaño 'number_of_coders'
+    int             size;      // Número actual de elementos en la cola
+};
+
+//**  DONGLES*/
+struct s_dongle
+{
+    pthread_mutex_t mutex; // Protege el estado de este dongle específico
+    pthread_cond_t  cond; //para que los coders esperen por este dongle
+    int             dongle_id; 
+    int             cooldown_wait; // está en periodo de cooldown
+    long            free_at; // timestamp en el que termina el cooldown
+    t_queue         dongle_queue; // cola de prioridad fifo o edf (cada dongle tiene su cola de espera)
+    int             holding_coder_id; // quien lo tiene ahora, -1 si está libre
+};
+
+//** CODERS */
+struct s_coder
+{
+    int         id;
+    long        compiler_counter;
+    bool        comp_done;
+    long        last_comp_time;
+    t_dongle    *left_dongle;
+    t_dongle    *right_dongle;
+    pthread_t   thread_id; // coder thread
+    t_desk      *desk;
+};
+
+//**CO-WORKING DESK */
+struct s_desk
+{
+    long            number_of_coders;
+    long long       time_to_burnout;
+    long long       time_to_compile;
+    long long       time_to_debug;
+    long long       time_to_refactor;
+    long            number_of_compiles_required;
+    long long       dongle_cooldown;
+    char            *scheduler;
+    long long       start_simulation;
+    bool            end_simulation; // when coders burnt out or compile
+    pthread_mutex_t log_mutex; // para que los printf no se mezclen
+    pthread_mutex_t sim_mutex; // para leer y escribir end_simulation de forma segura
+    t_dongle        *dongles;
+    t_coder         *coders;
+};
+
+//**MAIN */
+int main(int argc, char **argv);
+
+//**PARSER */
+void parse_input(t_desk *desk, char **argv);
+
+//**INIT */
+void    data_init(t_desk *desk);
+
+//**SIMULATION */
+void    start_codexion(t_desk *desk);
+
+//**QUEUE */
+t_queue_item    pop_waiting_list(t_queue *list);
+void    priority_sorter(t_queue *list, int index);
+
+//**CODERS */
+void    assign_the_dongles(t_coder *coder);
+void    work_in_progress(t_coder *coder);
+
+//** UTILS */
+void    error_exit(const char *msg, const char *func_name);
+void    *safe_malloc(size_t bytes, const char *func_name);
+long    get_current_time_in_ms(void);
+
+
+
+#endif
