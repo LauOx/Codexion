@@ -55,4 +55,9 @@ dkms.conf
 *.dwo
 
 # mac files
-*.DS_Store
+.DS_Store
+
+# Archivos ejecutables de Linux (compilados)
+*.out
+*.o
+a.out
