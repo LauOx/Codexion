@@ -8,28 +8,28 @@ static void swap_list_items(t_queue *list, int index, int most_urgent)
     list->array[most_urgent] = tmp;
 }
 
-static void    push_waiting_list(t_queue *list, int coder_id, long long priority)
-{
-    int current_index;
-    int parent_index;
-    t_queue_item  new_item;
-    current_index = list->size;
-    new_item.coder_id = coder_id;
-    new_item.priority = priority;
-    list->array[current_index] = new_item;
-    list->size ++;
-    while(current_index > 0)
-    {
-        parent_index = (current_index - 1) / 2;
-        if (list->array[current_index].priority < list->array[parent_index].priority)
-        {
-            swap_list_items(list, current_index, parent_index);
-            current_index = parent_index;
-        }
-        else
-            break; // si ya llegamos al sitio, chau
-    }
-}
+// static void    push_waiting_list(t_queue *list, int coder_id, long long priority)
+// {
+//     int current_index;
+//     int parent_index;
+//     t_queue_item  new_item;
+//     current_index = list->size;
+//     new_item.coder_id = coder_id;
+//     new_item.priority = priority;
+//     list->array[current_index] = new_item;
+//     list->size ++;
+//     while(current_index > 0)
+//     {
+//         parent_index = (current_index - 1) / 2;
+//         if (list->array[current_index].priority < list->array[parent_index].priority)
+//         {
+//             swap_list_items(list, current_index, parent_index);
+//             current_index = parent_index;
+//         }
+//         else
+//             break; // si ya llegamos al sitio, chau
+//     }
+// }
 
 t_queue_item    pop_waiting_list(t_queue *list)
 {

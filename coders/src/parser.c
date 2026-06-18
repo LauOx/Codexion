@@ -32,7 +32,6 @@ void    parse_input(t_desk *desk, char **argv)
 {
     int i;
     char *scheduler_str;
-    printf("estamos dentro de parser\n");
     desk->number_of_coders = valid_input(argv[1]);
     desk->time_to_burnout = valid_input(argv[2]);
     desk->time_to_compile = valid_input(argv[3]);

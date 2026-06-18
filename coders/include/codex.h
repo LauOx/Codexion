@@ -78,8 +78,9 @@ struct s_desk
     long            number_of_compiles_required;
     long long       dongle_cooldown;
     char            *scheduler;
-    long long       start_simulation;
+    unsigned long   start_simulation;
     bool            end_simulation; // when coders burnt out or compile
+    long            start_time;
     pthread_mutex_t log_mutex; // para que los printf no se mezclen
     pthread_mutex_t sim_mutex; // para leer y escribir end_simulation de forma segura
     t_dongle        *dongles;
@@ -96,7 +97,7 @@ void parse_input(t_desk *desk, char **argv);
 void    data_init(t_desk *desk);
 
 //**SIMULATION */
-void    start_codexion(t_desk *desk);
+void    start_simulation(t_desk *desk);
 
 //**QUEUE */
 t_queue_item    pop_waiting_list(t_queue *list);
@@ -110,6 +111,7 @@ void    work_in_progress(t_coder *coder);
 void    error_exit(const char *msg, const char *func_name);
 void    *safe_malloc(size_t bytes, const char *func_name);
 long    get_current_time_in_ms(void);
+void    print_status(t_coder *coder, char *status);
 
 
 

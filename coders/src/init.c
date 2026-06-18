@@ -6,7 +6,7 @@ static  void coder_init(t_desk *desk)
     i = 0;
     while(i < desk->number_of_coders)
     {
-        desk->coders[i].id = i;
+        desk->coders[i].id = i + 1;
         desk->coders[i].compiler_counter = 0;
         desk->coders[i].comp_done = false;
         desk->coders[i].last_comp_time = 0;
@@ -30,7 +30,7 @@ static void    dongles_init(t_desk *desk)
         desk->dongles[i].holding_coder_id = -1;
         desk->dongles[i].cooldown_wait = 0;
         pthread_mutex_init(&desk->dongles[i].mutex, NULL);
-        pthread_mutex_init(&desk->dongles[i].cond, NULL);
+        pthread_cond_init(&desk->dongles[i].cond, NULL);
         // wait_queue init
         desk->dongles[i].dongle_queue.array = safe_malloc(
             sizeof(t_queue_item) * desk->number_of_coders, __func__);

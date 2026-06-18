@@ -22,11 +22,11 @@ static void wait_for_the_dongle(t_coder *coder)
     t_dongle *right;
     long timestamp;
 
-    left = &coder->left_dongle;
-    right = &coder->right_dongle;
-    add_to_waiting_list(coder->desk, &left->dongle_queue, *coder);
-    add_to_waiting_list(coder->desk, &right->dongle_queue, *coder);
-
+    left = coder->left_dongle;
+    right = coder->right_dongle;
+    
+    pthread_mutex_lock(&left->mutex);
+    add_to_queue(coder->desk, &left->dongle_queue, *coder);
     timestamp = get_current_time_in_ms();
     while ((left->dongle_queue.array[0].coder_id != coder->id)
             || (timestamp < left->free_at))
@@ -34,13 +34,21 @@ static void wait_for_the_dongle(t_coder *coder)
         pthread_cond_wait(&left->cond, &left->mutex);
         timestamp = get_current_time_in_ms();
     }
+    left->holding_coder_id = coder->id;
+    pop_waiting_list(&left->dongle_queue);
+    pthread_mutex_unlock(&left->mutex);
     
+    pthread_mutex_lock(&right->mutex);
+    add_to_queue(coder->desk, &right->dongle_queue, *coder);
     while ((right->dongle_queue.array[0].coder_id != coder->id)
             || (timestamp < right->free_at))
     {
         pthread_cond_wait(&right->cond, &right->mutex);
         timestamp = get_current_time_in_ms();
     }
+    right->holding_coder_id = coder->id;
+    pop_waiting_list(&right->dongle_queue);
+    pthread_mutex_unlock(&right->mutex);
 }
 
 static void free_the_dongles(t_coder *coder)
@@ -50,12 +58,14 @@ static void free_the_dongles(t_coder *coder)
     timestamp = get_current_time_in_ms();
     
     //left_dongle
+    pthread_mutex_lock(&coder->left_dongle->mutex);
     coder->left_dongle->free_at = timestamp + coder->left_dongle->cooldown_wait;
     coder->left_dongle->holding_coder_id = -1;
     pthread_mutex_unlock(&coder->left_dongle->mutex); //desbloquea el recurso
     pthread_cond_broadcast(&coder->left_dongle->cond); // despierta a los coders que estan en fila para que revisen si son el siguiente
     
     //right_dongle
+    pthread_mutex_lock(&coder->right_dongle->mutex);
     coder->right_dongle->free_at = timestamp + coder->right_dongle->cooldown_wait;
     coder->right_dongle->holding_coder_id = -1; 
     pthread_mutex_unlock(&coder->right_dongle->mutex);
@@ -64,59 +74,27 @@ static void free_the_dongles(t_coder *coder)
 
 void    assign_the_dongles(t_coder *coder)
 {
-    t_dongle *left;
-    t_dongle *right;
-    long    timestamp;
-    
-    left = &coder->left_dongle;
-    right = &coder->right_dongle;
-
     wait_for_the_dongle(coder);
-
-    // marcar el dongle como ocupado por coder
-    left->holding_coder_id = coder->id;
-    right->holding_coder_id = coder->id;
-
-    // saca al coder de la lista de espera
-    pop_waiting_list(&left->dongle_queue);
-    pop_waiting_list(&right->dongle_queue);
   
-    timestamp = get_current_time_in_ms();
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    print("%ld %d has taken a dongle\n", timestamp, coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
+    print_status(coder, "has taken a dongle");
 
-    timestamp = get_current_time_in_ms();
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    print("%ld %d has taken a dongle\n", timestamp, coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
+    print_status(coder, "has taken a dongle");
 }
 
 void    work_in_progress(t_coder *coder)
 {
-    long    timestamp;
-
     // compile
-    timestamp = get_current_time_in_ms(); 
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("%ld %d is compiling\n", timestamp, coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
+    print_status(coder, "is compiling");
     usleep(coder->desk->time_to_compile * 1000);
     free_the_dongles(coder);
     coder->compiler_counter ++;
     
     //debug
-    timestamp = get_current_time_in_ms();
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("%ld %d is debugging\n", timestamp, coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
+    print_status(coder, "is debbuging");
     usleep(coder->desk->time_to_debug * 1000);
 
     //refactor
-    timestamp = get_current_time_in_ms();
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("%ld %d is refactoring\n", timestamp, coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
+    print_status(coder, "is refactoring");
     usleep(coder->desk->time_to_refactor * 1000);
 
 }

@@ -3,7 +3,8 @@
 int main(int argc, char **argv)
 {
     t_desk desk;
-    printf("argc = %d\n", argc);
+
+    desk.start_time = get_current_time_in_ms();
     if (argc == 9)
     {
         //errors checking
@@ -11,7 +12,7 @@ int main(int argc, char **argv)
         // initialize co-working desk
         data_init(&desk);
         // start hub simultion
-        start_codexion(&desk);
+        start_simulation(&desk);
         //no leaks, when the coders end the compilation or burnt out
         //clean(&desk);
     }
