@@ -30,10 +30,10 @@ static bool call_it_a_day(t_desk *desk, int compilation_done)
 
 void    *monitor(void *argv)
 {
-    int     i;
-    int     compilation_done;
-    t_desk  *desk;
-    t_coder *coder;
+    int         i;
+    int         compilation_done;
+    t_desk      *desk;
+    t_coder     *coder;
 
     desk = (t_desk *)argv;
     while (!desk->end_simulation)
@@ -43,8 +43,7 @@ void    *monitor(void *argv)
         while (i < desk->number_of_coders)
         {
             coder = &desk->coders[i];
-
-            if (get_current_time_in_ms() - coder->last_comp_time > desk->time_to_burnout)
+            if ((get_current_time_in_ms() - coder->last_comp_time) > desk->time_to_burnout)
             {
                 somebody_died(coder);
                 return (NULL);
@@ -64,12 +63,30 @@ void    start_simulation(t_desk *desk)
 {
     int i;
     i = 0;
-    pthread_create(&desk->start_simulation, NULL, monitor, desk);
+    desk->start_time = get_current_time_in_ms();
+    ///** PRUEBA VARIABLES */
+    printf("empezamos a las %ld\n", desk->start_time);
+    //**PRUEBA VARIABLES */
+    
+    // inicio de timepo de ultima compilación
+    while (i < desk->number_of_coders)
+    {
+        desk->coders[i].last_comp_time = desk->start_time;
+        i++;
+    }
+
+    // inicio de hilos de coder
+    i = 0;
     while (i < desk->number_of_coders)
     {
         pthread_create(&desk->coders[i].thread_id, NULL, run_coder, &desk->coders[i]);
         i++;
     }
+
+    // inicio de hilo monitor
+     pthread_create(&desk->start_simulation, NULL, monitor, desk);
+    
+    // join de los hilos coders
     i = 0;
     while (i < desk->number_of_coders)
     {

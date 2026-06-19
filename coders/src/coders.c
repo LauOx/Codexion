@@ -35,7 +35,13 @@ static void wait_for_the_dongle(t_coder *coder)
         timestamp = get_current_time_in_ms();
     }
     left->holding_coder_id = coder->id;
-    pop_waiting_list(&left->dongle_queue);
+    
+    //**PRUEBA QUE DONGLE COGIÓ */
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    printf("coder %d ha tomado left dongle id: %d\n", coder->id, coder->left_dongle->dongle_id);
+    pthread_mutex_unlock(&coder->desk->log_mutex);
+        //**PRUEBA QUE DONGLE COGIÓ */
+
     pthread_mutex_unlock(&left->mutex);
     
     pthread_mutex_lock(&right->mutex);
@@ -47,7 +53,13 @@ static void wait_for_the_dongle(t_coder *coder)
         timestamp = get_current_time_in_ms();
     }
     right->holding_coder_id = coder->id;
-    pop_waiting_list(&right->dongle_queue);
+    
+    //**PRUEBA QUE DONGLE COGIÓ */
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    printf("coder %d ha tomado right dongle id: %d\n", coder->id, coder->right_dongle->dongle_id);
+    pthread_mutex_unlock(&coder->desk->log_mutex);
+    //**PRUEBA QUE DONGLE COGIÓ */
+    
     pthread_mutex_unlock(&right->mutex);
 }
 
@@ -61,15 +73,23 @@ static void free_the_dongles(t_coder *coder)
     pthread_mutex_lock(&coder->left_dongle->mutex);
     coder->left_dongle->free_at = timestamp + coder->left_dongle->cooldown_wait;
     coder->left_dongle->holding_coder_id = -1;
-    pthread_mutex_unlock(&coder->left_dongle->mutex); //desbloquea el recurso
+    pop_waiting_list(&coder->left_dongle->dongle_queue);
     pthread_cond_broadcast(&coder->left_dongle->cond); // despierta a los coders que estan en fila para que revisen si son el siguiente
+    pthread_mutex_unlock(&coder->left_dongle->mutex); //desbloquea el recurso
     
     //right_dongle
     pthread_mutex_lock(&coder->right_dongle->mutex);
     coder->right_dongle->free_at = timestamp + coder->right_dongle->cooldown_wait;
     coder->right_dongle->holding_coder_id = -1; 
-    pthread_mutex_unlock(&coder->right_dongle->mutex);
+    pop_waiting_list(&coder->right_dongle->dongle_queue);
     pthread_cond_broadcast(&coder->right_dongle->cond);
+    pthread_mutex_unlock(&coder->right_dongle->mutex);
+
+    //**PRUEBA SOLTAR LOS DONGLES*/
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    printf("coder %d ha soltado los dongles\n", coder->id);
+    pthread_mutex_unlock(&coder->desk->log_mutex);
+    //**PRUEBA SOLTAR LOS DONGLES*/
 }
 
 void    assign_the_dongles(t_coder *coder)
@@ -83,12 +103,28 @@ void    assign_the_dongles(t_coder *coder)
 
 void    work_in_progress(t_coder *coder)
 {
+    //**PRUEBA */
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    long long tiempo_actual = get_current_time_in_ms();
+    long long momento_de_morir = coder->last_comp_time + coder->desk->time_to_burnout;
+    long long tiempo_restante = momento_de_morir - tiempo_actual;
+
+    printf("%d time left to compile: %lld ms\n", coder->id, tiempo_restante);    pthread_mutex_unlock(&coder->desk->log_mutex);
+    //**PRUEBA */
+
     // compile
     print_status(coder, "is compiling");
     usleep(coder->desk->time_to_compile * 1000);
     free_the_dongles(coder);
     coder->compiler_counter ++;
+    coder->last_comp_time = coder->desk->start_time - get_current_time_in_ms();
     
+    //**PRUEBA */
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    printf("%d finished compiling at: %ld\n", coder->id, coder->last_comp_time);
+    pthread_mutex_unlock(&coder->desk->log_mutex);
+    //**PRUEBA */
+
     //debug
     print_status(coder, "is debbuging");
     usleep(coder->desk->time_to_debug * 1000);
