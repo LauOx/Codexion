@@ -11,6 +11,7 @@ INCLUDES      = -I include
 # Archivos
 SRCS          = include/codex.h \
 				src/coders.c \
+				src/coders-vitals.c\
 				src/init.c \
 				src/main.c \
 				src/parser.c \
@@ -18,7 +19,7 @@ SRCS          = include/codex.h \
 				src/simulation.c \
 				src/utils.c \
 
-# Generates: obj/LIBFT/ft_atoi.o, etc.
+# Generates: obj/src/coders.o etc
 OBJS          = $(SRCS:%.c=$(DIR_OBJ)%.o)
 
 all: $(NAME)

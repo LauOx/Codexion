@@ -9,6 +9,17 @@ static int valid_input(const char *str)
     return (num);
 }
 
+static int valid_compiles_required(const char *str)
+{
+    int num;
+    if (strcmp(str, "0") == 0)
+        return (0);
+    num = atoi(str);
+    if (num <= 0)
+        error_exit("'number_of_compiles_required' is not a valid integrer", __func__);
+    return (num);    
+}
+
 static int valid_cooldown(const char *str)
 {
     int num;
@@ -37,7 +48,7 @@ void    parse_input(t_desk *desk, char **argv)
     desk->time_to_compile = valid_input(argv[3]);
     desk->time_to_debug = valid_input(argv[4]);
     desk->time_to_refactor = valid_input(argv[5]);
-    desk->number_of_compiles_required = valid_input(argv[6]);
+    desk->number_of_compiles_required = valid_compiles_required(argv[6]);
     desk->dongle_cooldown = valid_cooldown(argv[7]);
     if(strcmp(argv[8], "fifo") == 0 || strcmp(argv[8], "edf") == 0)
     {

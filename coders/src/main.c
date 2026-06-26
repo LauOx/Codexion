@@ -26,7 +26,7 @@ int main(int argc, char **argv)
         // start hub simultion
         start_simulation(&desk);
         //no leaks, when the coders end the compilation or burnt out
-        //clean(&desk);
+        free_all(&desk);
     }
     else{
         // function print error and exit

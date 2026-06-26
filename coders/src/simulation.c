@@ -5,10 +5,13 @@ static void    *run_coder(void *argv)
     t_coder *coder;
     
     coder = (t_coder *)argv; // casteamos para que lo que entró se convierta en coder
-    while (!coder->desk->end_simulation) //bucle infinito
+    while (!did_simulation_ended(coder->desk)) //bucle infinito
     {
         // asignar los libres al coder
         assign_the_dongles(coder);
+        
+        if (did_simulation_ended(coder->desk))
+            break;
         // trabajar y toda la vuelta
         work_in_progress(coder);
     }
@@ -18,41 +21,53 @@ static void    *run_coder(void *argv)
 
 static void *somebody_died(t_coder *coder)
 {
-    print_status(coder, "burned out");
-    coder->desk->end_simulation = true;
+    pthread_mutex_lock(&coder->desk->log_mutex);
+    if (!coder->desk->end_simulation)
+    {
+        printf("%ld %d burned out\n", get_current_time_in_ms() - coder->desk->start_time, coder->id);
+        coder->desk->end_simulation = true;
+    }
+    pthread_mutex_unlock(&coder->desk->log_mutex);
     return (NULL);
 }
 
-static bool call_it_a_day(t_desk *desk, int compilation_done)
+static void call_it_a_day(t_desk *desk, long coder_done)
 {
-    return (compilation_done == desk->number_of_compiles_required);
+    pthread_mutex_lock(&desk->log_mutex);
+    desk->end_simulation = coder_done == desk->number_of_coders;
+    pthread_mutex_unlock(&desk->log_mutex);
 }
 
 void    *monitor(void *argv)
 {
     int         i;
-    int         compilation_done;
+    long        coder_done;
     t_desk      *desk;
     t_coder     *coder;
 
     desk = (t_desk *)argv;
-    while (!desk->end_simulation)
+    while (!did_simulation_ended(desk))
     {
         i = 0;
-        compilation_done = 0;
+        coder_done = 0;
+        call_it_a_day(desk, coder_done); // en caso de que requiera 0 compilaciones
         while (i < desk->number_of_coders)
         {
             coder = &desk->coders[i];
-            if ((get_current_time_in_ms() - coder->last_comp_time) > desk->time_to_burnout)
+            if (is_coder_burnt_out(coder))
             {
                 somebody_died(coder);
                 return (NULL);
             }
+            if (did_simulation_ended(desk))
+                break;
             if (coder->compiler_counter >= desk->number_of_compiles_required)
-                compilation_done ++;
+                coder_done ++;
             i++;
         }
-        desk->end_simulation = call_it_a_day(desk, compilation_done);
+        if (did_simulation_ended(desk))
+            return(NULL);
+        call_it_a_day(desk, coder_done);
         usleep(500);
     }
     return(NULL);
@@ -63,10 +78,9 @@ void    start_simulation(t_desk *desk)
 {
     int i;
     i = 0;
+    if (desk->number_of_compiles_required == 0)
+        return;
     desk->start_time = get_current_time_in_ms();
-    ///** PRUEBA VARIABLES */
-    printf("empezamos a las %ld\n", desk->start_time);
-    //**PRUEBA VARIABLES */
     
     // inicio de timepo de ultima compilación
     while (i < desk->number_of_coders)
@@ -84,7 +98,7 @@ void    start_simulation(t_desk *desk)
     }
 
     // inicio de hilo monitor
-     pthread_create(&desk->start_simulation, NULL, monitor, desk);
+    pthread_create(&desk->start_simulation, NULL, monitor, desk);
     
     // join de los hilos coders
     i = 0;

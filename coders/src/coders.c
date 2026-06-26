@@ -13,7 +13,7 @@ static void    add_to_queue(t_desk *desk, t_queue *list, t_coder coder)
     queue_index = list->size;
     list->array[queue_index] = new_item;
     list->size ++;
-    priority_sorter(list, 0);
+    priority_sorter(list);
 }
 
 static void wait_for_the_dongle(t_coder *coder)
@@ -25,6 +25,7 @@ static void wait_for_the_dongle(t_coder *coder)
     left = coder->left_dongle;
     right = coder->right_dongle;
     
+    // left dongle
     pthread_mutex_lock(&left->mutex);
     add_to_queue(coder->desk, &left->dongle_queue, *coder);
     timestamp = get_current_time_in_ms();
@@ -34,16 +35,11 @@ static void wait_for_the_dongle(t_coder *coder)
         pthread_cond_wait(&left->cond, &left->mutex);
         timestamp = get_current_time_in_ms();
     }
-    left->holding_coder_id = coder->id;
-    
-    //**PRUEBA QUE DONGLE COGIÓ */
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("coder %d ha tomado left dongle id: %d\n", coder->id, coder->left_dongle->dongle_id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
-        //**PRUEBA QUE DONGLE COGIÓ */
-
+    if (!is_coder_burnt_out(coder))
+        left->holding_coder_id = coder->id;
     pthread_mutex_unlock(&left->mutex);
     
+    // right dongle
     pthread_mutex_lock(&right->mutex);
     add_to_queue(coder->desk, &right->dongle_queue, *coder);
     while ((right->dongle_queue.array[0].coder_id != coder->id)
@@ -52,13 +48,8 @@ static void wait_for_the_dongle(t_coder *coder)
         pthread_cond_wait(&right->cond, &right->mutex);
         timestamp = get_current_time_in_ms();
     }
-    right->holding_coder_id = coder->id;
-    
-    //**PRUEBA QUE DONGLE COGIÓ */
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("coder %d ha tomado right dongle id: %d\n", coder->id, coder->right_dongle->dongle_id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
-    //**PRUEBA QUE DONGLE COGIÓ */
+    if (!is_coder_burnt_out(coder))
+        right->holding_coder_id = coder->id;
     
     pthread_mutex_unlock(&right->mutex);
 }
@@ -84,53 +75,44 @@ static void free_the_dongles(t_coder *coder)
     pop_waiting_list(&coder->right_dongle->dongle_queue);
     pthread_cond_broadcast(&coder->right_dongle->cond);
     pthread_mutex_unlock(&coder->right_dongle->mutex);
-
-    //**PRUEBA SOLTAR LOS DONGLES*/
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("coder %d ha soltado los dongles\n", coder->id);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
-    //**PRUEBA SOLTAR LOS DONGLES*/
 }
 
 void    assign_the_dongles(t_coder *coder)
 {
-    wait_for_the_dongle(coder);
-  
-    print_status(coder, "has taken a dongle");
-
-    print_status(coder, "has taken a dongle");
+    if (!did_simulation_ended(coder->desk))
+    {
+        wait_for_the_dongle(coder);
+            if (did_simulation_ended(coder->desk))
+                return ;
+        print_status(coder, "has taken a dongle");
+        print_status(coder, "has taken a dongle");
+    }
 }
 
 void    work_in_progress(t_coder *coder)
 {
-    //**PRUEBA */
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    long long tiempo_actual = get_current_time_in_ms();
-    long long momento_de_morir = coder->last_comp_time + coder->desk->time_to_burnout;
-    long long tiempo_restante = momento_de_morir - tiempo_actual;
-
-    printf("%d time left to compile: %lld ms\n", coder->id, tiempo_restante);    pthread_mutex_unlock(&coder->desk->log_mutex);
-    //**PRUEBA */
-
     // compile
-    print_status(coder, "is compiling");
-    usleep(coder->desk->time_to_compile * 1000);
-    free_the_dongles(coder);
-    coder->compiler_counter ++;
-    coder->last_comp_time = coder->desk->start_time - get_current_time_in_ms();
-    
-    //**PRUEBA */
-    pthread_mutex_lock(&coder->desk->log_mutex);
-    printf("%d finished compiling at: %ld\n", coder->id, coder->last_comp_time);
-    pthread_mutex_unlock(&coder->desk->log_mutex);
-    //**PRUEBA */
+    if (!did_simulation_ended(coder->desk))
+    {
+        print_status(coder, "is compiling");
+        usleep(coder->desk->time_to_compile * 1000);
+        coder->last_comp_time = get_current_time_in_ms();
+        free_the_dongles(coder);
+        coder->compiler_counter ++;
+    }
 
     //debug
-    print_status(coder, "is debbuging");
-    usleep(coder->desk->time_to_debug * 1000);
+    if (!did_simulation_ended(coder->desk))
+    {
+        print_status(coder, "is debbuging");
+        usleep(coder->desk->time_to_debug * 1000);
+    }
 
     //refactor
-    print_status(coder, "is refactoring");
-    usleep(coder->desk->time_to_refactor * 1000);
+    if(!did_simulation_ended(coder->desk))
+    {
+        print_status(coder, "is refactoring");
+        usleep(coder->desk->time_to_refactor * 1000);
+    }
 
 }

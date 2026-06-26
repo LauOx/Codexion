@@ -31,3 +31,18 @@ void    print_status(t_coder *coder, char *status)
     printf("%ld %d %s\n", timestamp, coder->id, status);
     pthread_mutex_unlock(&coder->desk->log_mutex);
 }
+
+void    free_all(t_desk *desk)
+{
+    int i;
+    i = 0;
+    while(desk->number_of_coders > i)
+    {
+        free(desk->dongles[i].dongle_queue.array);
+        i++;
+    }
+    free(desk->coders);
+    free(desk->dongles);
+    free(desk->scheduler);
+
+}

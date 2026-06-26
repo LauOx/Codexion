@@ -29,6 +29,7 @@ static void    dongles_init(t_desk *desk)
         desk->dongles[i].dongle_id = i; // asigno un id al dongle desde el array de dongles de desk
         desk->dongles[i].holding_coder_id = -1;
         desk->dongles[i].cooldown_wait = 0;
+        desk->dongles[i].free_at = 0;
         pthread_mutex_init(&desk->dongles[i].mutex, NULL);
         pthread_cond_init(&desk->dongles[i].cond, NULL);
         // wait_queue init

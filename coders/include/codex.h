@@ -11,18 +11,6 @@
 #include <limits.h> // INT_MAX
 #include <string.h> // strcmp 
 
-//**OPERATION PCODE FOR MUTEX | THREAD FUNCTIONS */
-typedef enum e_opcode
-{
-    LOCK,
-    UNLOCK,
-    INIT,
-    DESTROY,
-    CREATE,
-    JOIN,
-    DETACH,
-}   t_opcode;
-
 //** STRUCTURES DECLARATION */
 typedef struct  s_dongle t_dongle;
 typedef struct  s_coder t_coder;
@@ -101,17 +89,22 @@ void    start_simulation(t_desk *desk);
 
 //**QUEUE */
 t_queue_item    pop_waiting_list(t_queue *list);
-void    priority_sorter(t_queue *list, int index);
+void    priority_sorter(t_queue *list);
 
 //**CODERS */
 void    assign_the_dongles(t_coder *coder);
 void    work_in_progress(t_coder *coder);
+
+//**CODERS-VITALS */
+bool    did_simulation_ended(t_desk *desk);
+bool    is_coder_burnt_out(t_coder *coder);
 
 //** UTILS */
 void    error_exit(const char *msg, const char *func_name);
 void    *safe_malloc(size_t bytes, const char *func_name);
 long    get_current_time_in_ms(void);
 void    print_status(t_coder *coder, char *status);
+void    free_all(t_desk *desk);
 
 
 
