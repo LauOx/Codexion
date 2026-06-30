@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:49 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 17:11:01 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/01 00:55:45 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ static void	*run_coder(void *argv)
 			break ;
 		work_in_progress(coder);
 	}
-
 	return (NULL);
 }
 
@@ -86,9 +85,8 @@ void	start_simulation(t_desk *desk)
 			run_coder, &desk->coders[i]);
 
 	pthread_create(&desk->start_simulation, NULL, monitor, desk);
-
+	pthread_join(desk->start_simulation, NULL);
 	i = -1;
 	while (++i < desk->number_of_coders)
 		pthread_join(desk->coders[i].thread_id, NULL);
-	pthread_join(desk->start_simulation, NULL);
 }

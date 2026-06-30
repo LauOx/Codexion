@@ -65,7 +65,7 @@ Escenario ideal:
 ./codexion 3 50 200 100 100 10 0 fifo
 ```
 
-**Explicación:** *Burnout* Un coder necesita 200 ms para compilar, pero solo tiene 50 ms de vida inicial. Nadie llegará jamás a compilar. El monitor debe detener el programa exactamente en el milisegundo 51.
+**Explicación:** *Burnout* Un coder necesita 200 ms para compilar, pero solo tiene 50 ms de vida inicial. Nadie llegará jamás a compilar. El monitor debe detener el programa alrededor del milisegundo 50.
 
 ```bash
 ./codexion 3 600 50 50 50 4 200 fifo
@@ -75,15 +75,15 @@ Escenario ideal:
 
 Prueba A (Debería fallar/morir con FIFO):
 ```bash
-./codexion 3 350 100 100 100 3 10 fifo
+./codexion 3 160 40 10 10 2 0 fifo
 ```
 
 Prueba B (Debería salvarse/terminar con EDF):
 ```bash
-./codexion 3 350 100 100 100 3 10 edf
+./codexion 3 160 40 10 10 2 0 edf
 ```
 
-**Explicación:** Al estar en el límite de tiempo (350 ms de vida frente a 300 ms de ciclo), si un coder con mucha prisa por compilar (porque le queda poca vida) se queda atrapado detrás de otro que acaba de empezar en la cola, en FIFO morirá esperando. En EDF, la función priority_sorter detectará que el rezagado tiene un deadline más urgente, lo pondrá al principio de la cola (array[0]), compilará a tiempo y todos sobrevivirán.
+**Explicación:** Al estar en el límite de tiempo (160 ms de vida frente a 40 ms de ciclo), si un coder con mucha prisa por compilar (porque le queda poca vida) se queda atrapado detrás de otro que acaba de empezar en la cola, en FIFO morirá esperando. En EDF, la función priority_sorter detectará que el rezagado tiene un deadline más urgente, lo pondrá al principio de la cola (array[0]), compilará a tiempo y todos sobrevivirán.
 
 ```bash
 ./codexion 3 600 100 100 100 0 10 edf

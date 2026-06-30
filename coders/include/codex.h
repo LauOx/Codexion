@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:28:37 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 15:59:48 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/06/30 23:59:27 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,11 +109,13 @@ void    priority_sorter(t_queue *list);
 //**CODERS */
 void    assign_the_dongles(t_coder *coder);
 void    work_in_progress(t_coder *coder);
+void	free_the_dongles(t_coder *coder);
 
 //**CODERS-VITALS */
 bool    did_simulation_ended(t_desk *desk);
 bool    is_coder_burnt_out(t_coder *coder);
 void	wait_your_turn(t_coder *coder, t_dongle *dongle);
+void	lock_dongles_in_order(t_dongle *left, t_dongle *right);
 
 //** UTILS */
 void    error_exit(const char *msg, const char *func_name);
