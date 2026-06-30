@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   codex.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/30 13:28:37 by lospina-          #+#    #+#             */
+/*   Updated: 2026/06/30 15:59:48 by lospina-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
 #ifndef CODEX_H
-#define CODEX_H
+# define CODEX_H
 
 //**LIBRARIES */
-#include <stdio.h> // printf
-#include <stdlib.h> // malloc, free
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h> // usleep
 #include <stdbool.h> // bool, true, false
 #include <pthread.h> //mutex, threads, cond variables
@@ -12,29 +25,31 @@
 #include <string.h> // strcmp 
 
 //** STRUCTURES DECLARATION */
-typedef struct  s_dongle t_dongle;
-typedef struct  s_coder t_coder;
-typedef struct  s_desk t_desk;
-typedef struct  s_queue t_queue;
-typedef struct  s_queue_item t_queue_item;
+typedef struct s_dongle		t_dongle;
+typedef struct s_coder		t_coder;
+typedef struct s_desk		t_desk;
+typedef struct s_queue		t_queue;
+typedef struct s_queue_item	t_queue_item;
 
 
 //**DONGLE QUEUE */
-struct  s_queue_item {
-    int         coder_id;  // ID del programador (de 1 a number_of_coders)
-    long long   priority;  // FIFO: timestamp de llegada | EDF: deadline de burnout
+struct	s_queue_item
+{
+	int			coder_id;
+	long long	priority;
 };
 
-struct  s_queue {
-    t_queue_item    *array;    // Array de tamaño 'number_of_coders'
-    int             size;      // Número actual de elementos en la cola
+struct	s_queue
+{
+	t_queue_item	*array;
+	int				size;
 };
 
 //**  DONGLES*/
 struct s_dongle
 {
-    pthread_mutex_t mutex; // Protege el estado de este dongle específico
-    pthread_cond_t  cond; //para que los coders esperen por este dongle
+	pthread_mutex_t	mutex; // Protege el estado de este dongle específico
+    pthread_cond_t	cond; //para que los coders esperen por este dongle
     int             dongle_id; 
     int             cooldown_wait; // está en periodo de cooldown
     long            free_at; // timestamp en el que termina el cooldown
@@ -71,7 +86,7 @@ struct s_desk
     long            start_time;
     pthread_mutex_t log_mutex; // para que los printf no se mezclen
     pthread_mutex_t sim_mutex; // para leer y escribir end_simulation de forma segura
-    t_dongle        *dongles;
+    t_dongle        *dongles; // punteros.. por qué? no se aun
     t_coder         *coders;
 };
 
@@ -98,6 +113,7 @@ void    work_in_progress(t_coder *coder);
 //**CODERS-VITALS */
 bool    did_simulation_ended(t_desk *desk);
 bool    is_coder_burnt_out(t_coder *coder);
+void	wait_your_turn(t_coder *coder, t_dongle *dongle);
 
 //** UTILS */
 void    error_exit(const char *msg, const char *func_name);
