@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:49 by lospina-          #+#    #+#             */
-/*   Updated: 2026/07/01 00:55:45 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/01 20:01:15 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@ static void	*run_coder(void *argv)
 {
 	t_coder	*coder;
 
-	coder = (t_coder *)argv; // casteamos para que lo que entró se convierta en coder
+	coder = (t_coder *)argv;
 	while (!did_simulation_ended(coder->desk))
 	{
-		assign_the_dongles(coder);
+		get_the_dongles(coder);
 
 		if (did_simulation_ended(coder->desk))
 			break ;
@@ -53,8 +53,7 @@ void	*monitor(void *argv)
 				return (NULL);
 			if (did_simulation_ended(desk))
 				break ;
-			if (desk->coders[i].compiler_counter
-				>= desk->number_of_compiles_required)
+			if (desk->coders[i].comp_done)
 				coder_done ++;
 		}
 		if (did_simulation_ended(desk))
@@ -75,7 +74,6 @@ void	start_simulation(t_desk *desk)
 		return ;
 	desk->start_time = get_current_time_in_ms();
 
-	// inicialización de timepo de ultima compilación
 	while (++i < desk->number_of_coders)
 		desk->coders[i].last_comp_time = desk->start_time;
 
