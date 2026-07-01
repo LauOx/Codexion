@@ -7,6 +7,8 @@
 
 La simulación consiste en un set de `coders` (hilos) que necesitan ejecutar tareas (Compile, Debug and Refactor). Para compilar, el `coder` debe contar con 2 dongles (recursos compartidos). El reto principal de este proyecto es gestionar la competencia por estos recursos basandose en una politica de arbitraje (**FIFO** Y **EDF**), evitar probelmas de sincronización y diseñar un hilo `monitor` que puenda detener la simulación ante el agotamiento (`burnout`).
 
+Para recopilar información más detallada del proyecto he construido una guía en Notion: https://app.notion.com/p/Codexion-390ef47991ff80a0b82ee5dcd76cf888
+
 ---
 
 ## Instrucciones
@@ -115,6 +117,8 @@ Durante el desarrollo del proyecto se han usado algunos asistentes gratuitos de 
 *Codexion* is a concurrent simulation project designed to solve variations of the classic Dining Philosophers problem, adapted to a modern software development environment.
 
 The simulation consists of a set of `coders` (threads) that need to execute tasks (Compile, Debug, and Refactor). To compile, each `coder` must have 2 `dongles` (shared resources). The main challenge of this project is managing competition for these resources based on an arbitration policy (*FIFO* and *EDF*), avoiding synchronization problems, and designing a monitor thread capable of stopping the simulation in case of exhaustion (`burnout`).
+
+To gather more detailed information about the project, I've created a guide on Notion: https://app.notion.com/p/Codexion-390ef47991ff80a0b82ee5dcd76cf888
 
 ## Instructions
 ### Compilation
