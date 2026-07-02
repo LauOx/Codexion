@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:28:54 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 14:22:16 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/02 16:50:44 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,6 @@ static void	dongles_init(t_desk *desk)
 		desk->dongles[i].free_at = 0;
 		pthread_mutex_init(&desk->dongles[i].mutex, NULL);
 		pthread_cond_init(&desk->dongles[i].cond, NULL);
-
 		desk->dongles[i].dongle_queue.array = safe_malloc(sizeof(t_queue_item)
 				* desk->number_of_coders, __func__);
 		desk->dongles[i].dongle_queue.size = 0;

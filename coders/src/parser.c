@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:07 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 14:29:40 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/02 17:00:52 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,6 @@ static int	ft_strlen(char *str)
 	int	i;
 
 	i = 0;
-
 	while (str[i])
 		i++;
 	return (i);

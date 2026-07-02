@@ -6,10 +6,9 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:49 by lospina-          #+#    #+#             */
-/*   Updated: 2026/07/01 20:01:15 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/02 16:56:24 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "codex.h"
 
@@ -21,7 +20,6 @@ static void	*run_coder(void *argv)
 	while (!did_simulation_ended(coder->desk))
 	{
 		get_the_dongles(coder);
-
 		if (did_simulation_ended(coder->desk))
 			break ;
 		work_in_progress(coder);
@@ -64,7 +62,6 @@ void	*monitor(void *argv)
 	return (NULL);
 }
 
-
 void	start_simulation(t_desk *desk)
 {
 	int	i;
@@ -73,15 +70,12 @@ void	start_simulation(t_desk *desk)
 	if (desk->number_of_compiles_required == 0)
 		return ;
 	desk->start_time = get_current_time_in_ms();
-
 	while (++i < desk->number_of_coders)
 		desk->coders[i].last_comp_time = desk->start_time;
-
 	i = -1;
 	while (++i < desk->number_of_coders)
 		pthread_create(&desk->coders[i].thread_id, NULL,
 			run_coder, &desk->coders[i]);
-
 	pthread_create(&desk->start_simulation, NULL, monitor, desk);
 	pthread_join(desk->start_simulation, NULL);
 	i = -1;

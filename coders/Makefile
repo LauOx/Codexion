@@ -11,7 +11,7 @@ INCLUDES      = -I include
 # Archivos
 SRCS          = include/codex.h \
 				src/coders.c \
-				src/coders-vitals.c\
+				src/coder_helpers.c\
 				src/init.c \
 				src/main.c \
 				src/parser.c \

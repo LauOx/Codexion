@@ -6,29 +6,26 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:39 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 14:31:39 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/02 16:53:27 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "codex.h"
 
-t_queue_item	pop_waiting_list(t_queue *list)
+void	pop_waiting_list(t_queue *list)
 {
-	int				last_item;
-	t_queue_item	item_ret;
+	int	i;
 
 	if (list->size == 0)
+		return ;
+	i = 0;
+	while (i < list->size - 1)
 	{
-		item_ret.coder_id = -1;
-		return (item_ret);
+		list->array[i] = list->array[i + 1];
+		i++;
 	}
-	last_item = list->size - 1;
-	item_ret = list->array[0];
-	list->array[0] = list->array[last_item];
 	list->size--;
 	priority_sorter(list);
-	return (item_ret);
 }
 
 void	priority_sorter(t_queue *list)

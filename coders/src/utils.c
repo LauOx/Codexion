@@ -6,7 +6,7 @@
 /*   By: lospina- <lospina-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/30 13:29:54 by lospina-          #+#    #+#             */
-/*   Updated: 2026/06/30 14:42:42 by lospina-         ###   ########.fr       */
+/*   Updated: 2026/07/02 20:33:00 by lospina-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ void	print_status(t_coder *coder, char *status)
 {
 	long	timestamp;
 
+	if (did_simulation_ended(coder->desk))
+		return ;
 	pthread_mutex_lock(&coder->desk->log_mutex);
 	timestamp = get_current_time_in_ms() - coder->desk->start_time;
 	printf("%ld %d %s\n", timestamp, coder->id, status);
